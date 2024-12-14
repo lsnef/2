@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Phone Code</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="modal_content">
+        <h5>Get Phone Code</h5>
+        <div>
+            <label for="phone1">手机号：</label><br>
+            <input id="phone1" type="text" autocomplete="off" placeholder="请输入手机号" maxlength="11" oninput="limitInputLength(this)">
+        </div>
+        <div>
+            <label for="code1">验证码：</label>
+            <div class="code1">
+                <input id="code1" type="text" autocomplete="off" placeholder="短信验证码"  maxlength="6" oninput="limitInputLength(this)">
+                <input id="btnSendCode1" type="button" class="btn btn-default" value="获取验证码"
+                    onclick="sendMessage1()">
+            </div>
+        </div>
+        <div class="next">
+            <button onclick="binding()">复制dd10+手机号+验证码</button>
+        </div>
+    </div>
+    <p>说明:</p>
+    <p>1、输入11位手机号,点击获取验证码</p>
+    <style>
+        p {
+            color: red;
+            padding-left: 10px;
+            text-align: center
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .modal_content {
+            width: 80%;
+            margin: 50px auto 0;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+
+        .modal_content>div {
+            margin-bottom: 20px;
+        }
+
+        .modal_content>h5:first-child {
+            margin: 30px 0;
+            font-size: 18px;
+            color: #d6061c;
+            font-weight: bold;
+        }
+
+        #dialog label {
+            color: #666
+        }
+
+        #phone1 {
+            display: block;
+            width: 100%;
+            height: 70px;
+            background: 0 0;
+            padding-top: 30px;
+            border: 0;
+            outline: 0;
+            margin-top: -30px;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, .2);
+            border-radius: 0
+        }
+
+        .code1 {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 100%;
+            height: 70px;
+            background: 0 0;
+            padding-top: 30px;
+            margin-top: -30px;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, .2);
+            border-radius: 0
+        }
+
+        #code1 {
+            width: calc(100% - 90px);
+            height: 55px;
+            background: 0 0;
+            padding-top: 20px;
+            border: 0;
+            outline: 0;
+            margin-top: -20px;
+            font-size: 16px
+        }
+
+        #btnSendCode1 {
+            width: 90px;
+            height: 30px;
+            padding: 0 5px;
+            margin: 0;
+            font-size: 14px;
+            background: 0 0;
+            border-radius: 30px;
+            color: #a07941;
+            border-color: #a07941;
+            outline: 0
+        }
+
+        ::-webkit-input-placeholder {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .4)
+        }
+
+        :-moz-placeholder {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .4)
+        }
+
+        ::-moz-placeholder {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .4)
+        }
+
+        :-ms-input-placeholder {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .4)
+        }
+
+        .next {
+            text-align: center;
+            margin: 20px 0
+        }
+
+        .next button {
+            width: 230px;
+            height: 40px;
+            padding: 0;
+            margin: auto;
+            background: rgb(254, 102, 128);
+            color: #fff;
+            border: 0;
+            outline: 0;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+    </style>
+
+    <script>
+
+        function getRandomCharacters(length) {
+            var characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+            var result = "";
+            for (var i = 0; i < length; i++) {
+                var randomIndex = Math.floor(Math.random() * characters.length);
+                result += characters.charAt(randomIndex);
+            }
+            return result;
+        }
+        var phoneReg = /(^1[3|4|5|6|7|8|9]\d{9}$)|(^09\d{8}$)/; //手机号正则 
+        var count = 120; //间隔函数，1秒执行
+        var InterValObj1; //timer变量，控制时间
+        var curCount1; //当前剩余秒数
+        /*判断输入的手机号*/
+        function sendMessage1() {
+            curCount1 = count;
+            var phone = $.trim($('#phone1').val());
+            if (!phoneReg.test(phone)) {
+                alert(" 请输入有效的手机号码");
+                return false;
+            }
+            //设置button效果，开始计时
+            $("#btnSendCode1").attr("disabled", "true");
+            $("#btnSendCode1").val(+curCount1 + "秒再获取");
+            InterValObj1 = window.setInterval(SetRemainTime1, 1000); //启动计时器，1秒执行一次
+            //向后台发送处理数据
+            getCode(phone)
+        }
+        // 
+        function getCode(phoneNumber) {
+            const url = 'https://epassport.diditaxi.com.cn/passport/login/v5/codeMT?wsgsig=dd03-xoFT913bd00BUeVUtxFJLS80GXX0rq1tsZH11TCAGXXGUUSR%2F6rML5Kagg0GUeVrU2LB%2BL4ggGJFiAPxrH6MLS8egC79hFaZkY2%2B2L4ggg0BVAxqkY6eMS89Cbc9khTxqSxMKS5';
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: `lang=zh-CN&access_key_id=9&appversion=6.7.20&channel=1100000013&_ds=&q=%7B%22api_version%22:%221.0.1%22,%22appid%22:35009,%22role%22:1,%22extra_info%22:%7B%22channel%22:1100000013%7D,%22device_name%22:%22iPhone%2012%3CiPhone13,2%3E%22,%22sec_session_id%22:%22%22,%22policy_id_list%22:[50001289],%22policy_name_list%22:[],%22ddfp%22:%22b1044faf011a9edba${phoneNumber}9b0b3aaf%22,%22lang%22:%22zh-CN%22,%22wsgenv%22:%22%22,%22cell%22:%22${phoneNumber}%22,%22country_calling_code%22:%22%2B86%22,%22code_type%22:0,%22scene%22:1%7D`,
+                success: function (res) {
+                    let resData = JSON.parse(res)
+                    if (resData.errno === 0) {
+                        alert('获取验证码成功')
+                    } else {
+                        alert(resData.error)
+                    }
+                },
+                error: function (err) {
+                    alert('获取验证码失败，请重新获取')
+                }
+            })
+        }
+
+        function SetRemainTime1() {
+            if (curCount1 == 0) {
+                window.clearInterval(InterValObj1); //停止计时器
+                $("#btnSendCode1").removeAttr("disabled"); //启用按钮
+                $("#btnSendCode1").val("重新发送");
+            } else {
+                curCount1--;
+                $("#btnSendCode1").val(+curCount1 + "秒再获取");
+            }
+        }
+
+        /*提交*/
+        function binding() {
+            var phone = $.trim($('#phone1').val());
+            var code1 = $.trim($('#code1').val());
+            if (phone && code1) {
+                var copyText = "dd10+" + `${phone}+${code1}`;
+
+                // 创建一个新的input元素
+
+                var input = document.createElement('input');
+
+                // 设置input的值为要复制的文本
+
+                input.setAttribute('value', copyText);
+
+                // 将input元素添加到body中
+
+                document.body.appendChild(input);
+
+                // 选中input中的文本
+
+                input.select();
+
+                // 执行复制命令
+
+                document.execCommand('copy');
+
+                // 移除input元素
+
+                document.body.removeChild(input);
+                alert('复制成功：' + copyText)
+            } else {
+                alert('手机号or验证码未填写，请填写完整')
+            }
+        }
+
+        // 限制输入框长度
+        function limitInputLength(element) {
+            var maxLength = parseInt(element.getAttribute('maxlength'));
+            if (element.value.length > maxLength) {
+                element.value = element.value.slice(0, maxLength);
+            }
+        }
+    </script>
+</body>
+
+</html>
